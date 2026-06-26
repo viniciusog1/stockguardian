@@ -19,6 +19,7 @@ from app.repositories.movement import MovementRepository
 from app.repositories.product import ProductRepository
 from app.schemas.common import Page, PaginationParams
 from app.schemas.movement import MovementCreate, MovementFilter
+from app.services.alert import AlertService
 
 logger = get_logger(__name__)
 
@@ -60,7 +61,9 @@ class MovementService:
             reason=data.reason,
         )
         await self.repo.add(movement)
-        await self.session.commit()  # produto + movimento atômicos
+        # Avalia alerta de estoque baixo na mesma transação (produto já atualizado).
+        await AlertService(self.session).evaluate(product)
+        await self.session.commit()  # produto + movimento + alerta atômicos
         await self.session.refresh(movement)
         logger.info(
             "stock_movement",

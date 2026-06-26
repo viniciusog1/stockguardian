@@ -11,6 +11,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.models.base import Base, TimestampMixin, UUIDMixin
 
 if TYPE_CHECKING:
+    from app.models.stock_alert import StockAlert
     from app.models.stock_movement import StockMovement
     from app.models.supplier import Supplier
 
@@ -48,6 +49,10 @@ class Product(UUIDMixin, TimestampMixin, Base):
 
     supplier: Mapped[Supplier] = relationship(back_populates="products", lazy="selectin")
     movements: Mapped[list[StockMovement]] = relationship(
+        back_populates="product",
+        cascade="all, delete-orphan",
+    )
+    alerts: Mapped[list[StockAlert]] = relationship(
         back_populates="product",
         cascade="all, delete-orphan",
     )
