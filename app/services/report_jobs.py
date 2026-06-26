@@ -31,24 +31,25 @@ def map_job_status(status: JobStatus, *, success: bool | None = None) -> ReportJ
     return ReportJobState.COMPLETE if success else ReportJobState.FAILED
 
 
+def _require_job_id(job: Job | None) -> str:
+    if job is None:
+        raise ConflictError("Não foi possível enfileirar o relatório.")
+    return job.job_id
+
+
 class ReportJobQueue:
     def __init__(self, pool: ArqRedis) -> None:
         self.pool = pool
 
-    async def _enqueue(self, function: str, **kwargs: object) -> str:
-        job = await self.pool.enqueue_job(function, **kwargs)
-        if job is None:
-            raise ConflictError("Não foi possível enfileirar o relatório.")
-        return job.job_id
-
     async def enqueue_inventory_valuation(
         self, *, supplier_id: uuid.UUID | None, only_active: bool
     ) -> str:
-        return await self._enqueue(
+        job = await self.pool.enqueue_job(
             "generate_inventory_valuation_export",
             supplier_id=supplier_id,
             only_active=only_active,
         )
+        return _require_job_id(job)
 
     async def enqueue_movements_summary(
         self,
@@ -57,12 +58,13 @@ class ReportJobQueue:
         date_from: datetime | None,
         date_to: datetime | None,
     ) -> str:
-        return await self._enqueue(
+        job = await self.pool.enqueue_job(
             "generate_movements_summary_export",
             product_id=product_id,
             date_from=date_from,
             date_to=date_to,
         )
+        return _require_job_id(job)
 
     async def get_status(self, job_id: str) -> ReportJobState:
         job = Job(job_id, self.pool)
