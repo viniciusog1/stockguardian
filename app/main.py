@@ -15,6 +15,7 @@ from fastapi import FastAPI
 from app.api.v1.router import api_router
 from app.core.config import settings
 from app.core.logging import configure_logging, get_logger
+from app.core.metrics import setup_metrics
 from app.core.queue import close_arq_pool
 from app.core.redis import close_redis, get_redis
 from app.exceptions.handlers import register_exception_handlers
@@ -57,6 +58,9 @@ def create_app() -> FastAPI:
     @app.get("/health", tags=["health"], summary="Liveness probe")
     async def health() -> dict[str, str]:
         return {"status": "ok", "service": settings.PROJECT_NAME}
+
+    if settings.METRICS_ENABLED:
+        setup_metrics(app)
 
     return app
 
