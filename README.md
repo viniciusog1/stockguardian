@@ -34,7 +34,8 @@ software real de empresa, com arquitetura limpa, segurança e testes.
 | ORM | SQLAlchemy 2.x (async / asyncpg) |
 | Migrations | Alembic |
 | Banco | PostgreSQL 16 |
-| Cache / tokens | Redis 7 |
+| Cache / tokens / fila | Redis 7 |
+| Tarefas assíncronas | ARQ (worker async) |
 | Validação | Pydantic v2 |
 | Testes | pytest + pytest-asyncio |
 | Deps | uv |
@@ -76,7 +77,7 @@ cp .env.example .env
 # (opcional) gerar SECRET_KEY forte:
 #   openssl rand -hex 32  → cole em SECRET_KEY no .env
 
-# 2. Subir API + PostgreSQL + Redis (migrations rodam no start)
+# 2. Subir API + worker (ARQ) + PostgreSQL + Redis (migrations rodam no start da API)
 docker compose -f docker/docker-compose.yml up --build
 
 # 3. Popular dados de demonstração (admin + produtos)
@@ -111,6 +112,10 @@ Login inicial (do `.env`): `admin@stockguardian.com` / `Admin@123`.
 | GET | `/reports/movements-summary` | Movimentações agregadas por tipo no período (filtro `product_id`, `date_from`, `date_to`) | MANAGER+ |
 | GET | `/reports/inventory-valuation/export` | Download do valuation em `.xlsx` | MANAGER+ |
 | GET | `/reports/movements-summary/export` | Download do resumo de movimentações em `.xlsx` | MANAGER+ |
+| POST | `/reports/inventory-valuation/export-async` | Enfileira geração do `.xlsx` (assíncrono, ARQ) | MANAGER+ |
+| POST | `/reports/movements-summary/export-async` | Enfileira geração do `.xlsx` (assíncrono, ARQ) | MANAGER+ |
+| GET | `/reports/jobs/{id}` | Status do job de relatório | MANAGER+ |
+| GET | `/reports/jobs/{id}/download` | Baixa o `.xlsx` do job concluído | MANAGER+ |
 
 ## 🧪 Testes & qualidade
 
@@ -133,7 +138,7 @@ CI (GitHub Actions) roda lint + mypy + pytest contra um serviço Postgres a cada
 
 - [x] **Fase 1 — MVP**: auth, usuários, fornecedores, produtos, movimentações, histórico
 - [x] **Fase 2**: alertas de estoque baixo · dashboard operacional · RBAC granular
-- [ ] **Fase 3**: ~~detecção de superestoque~~ ✅ · ~~relatórios~~ ✅ · ~~export Excel~~ ✅ · tarefas assíncronas
+- [x] **Fase 3**: detecção de superestoque · relatórios · export Excel · tarefas assíncronas (ARQ)
 - [ ] **Fase 4**: observabilidade (Prometheus/OpenTelemetry), deploy, monitoramento
 
 ## 📄 Licença

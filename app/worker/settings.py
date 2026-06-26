@@ -5,7 +5,7 @@ Executar: ``arq app.worker.settings.WorkerSettings``.
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, ClassVar
 
 from app.core.config import settings
 from app.core.database import async_session_factory, engine
@@ -25,7 +25,10 @@ async def shutdown(ctx: dict[str, Any]) -> None:
 
 
 class WorkerSettings:
-    functions = [generate_inventory_valuation_export, generate_movements_summary_export]
+    functions: ClassVar[list[Any]] = [
+        generate_inventory_valuation_export,
+        generate_movements_summary_export,
+    ]
     redis_settings = report_redis_settings()
     on_startup = startup
     on_shutdown = shutdown
