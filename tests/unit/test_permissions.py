@@ -19,6 +19,7 @@ def test_operator_subset() -> None:
     assert Permission.ALERT_ACKNOWLEDGE in perms
     assert Permission.PRODUCT_WRITE not in perms
     assert Permission.ALERT_RESOLVE not in perms
+    assert Permission.REPORT_READ not in perms
     assert Permission.USER_MANAGE not in perms
 
 
@@ -27,6 +28,7 @@ def test_manager_has_writes_but_not_user_manage() -> None:
     assert Permission.PRODUCT_WRITE in perms
     assert Permission.ALERT_RESOLVE in perms
     assert Permission.DASHBOARD_READ in perms
+    assert Permission.REPORT_READ in perms
     assert Permission.USER_MANAGE not in perms
 
 

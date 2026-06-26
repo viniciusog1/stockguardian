@@ -22,6 +22,7 @@ class Permission(StrEnum):
     ALERT_ACKNOWLEDGE = "alert:acknowledge"
     ALERT_RESOLVE = "alert:resolve"
     DASHBOARD_READ = "dashboard:read"
+    REPORT_READ = "report:read"
     USER_MANAGE = "user:manage"
 
 
@@ -41,6 +42,7 @@ _MANAGER: frozenset[Permission] = _OPERATOR | frozenset(
         Permission.PRODUCT_WRITE,
         Permission.ALERT_RESOLVE,
         Permission.DASHBOARD_READ,
+        Permission.REPORT_READ,
     }
 )
 _ADMIN: frozenset[Permission] = frozenset(Permission)  # todas
