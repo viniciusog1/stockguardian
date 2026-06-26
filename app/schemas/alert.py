@@ -5,7 +5,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
-from app.models.stock_alert import AlertStatus
+from app.models.stock_alert import AlertKind, AlertStatus
 
 
 class AlertRead(BaseModel):
@@ -13,9 +13,10 @@ class AlertRead(BaseModel):
 
     id: uuid.UUID
     product_id: uuid.UUID
+    kind: AlertKind
     status: AlertStatus
     triggered_quantity: int
-    min_stock_at_trigger: int
+    threshold_at_trigger: int
     acknowledged_by: uuid.UUID | None
     acknowledged_at: datetime | None
     resolved_at: datetime | None
@@ -27,4 +28,5 @@ class AlertFilter(BaseModel):
     """Filtros opcionais da listagem de alertas."""
 
     status: AlertStatus | None = None
+    kind: AlertKind | None = None
     product_id: uuid.UUID | None = None

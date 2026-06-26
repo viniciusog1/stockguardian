@@ -32,7 +32,7 @@ async def _seed_open_alert(db_session: AsyncSession, product_id: uuid.UUID) -> u
         product_id=product_id,
         status=AlertStatus.OPEN,
         triggered_quantity=0,
-        min_stock_at_trigger=5,
+        threshold_at_trigger=5,
     )
     db_session.add(alert)
     await db_session.commit()

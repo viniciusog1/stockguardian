@@ -23,24 +23,30 @@ class AlertStatus(StrEnum):
     RESOLVED = "resolved"
 
 
+class AlertKind(StrEnum):
+    LOW_STOCK = "low_stock"
+    OVERSTOCK = "overstock"
+
+
 # Estados que contam como "alerta ativo" (não-resolvido).
 ACTIVE_ALERT_STATUSES = (AlertStatus.OPEN, AlertStatus.ACKNOWLEDGED)
 
 
 class StockAlert(UUIDMixin, TimestampMixin, Base):
-    """Alerta de estoque baixo de um produto.
+    """Alerta de estoque de um produto (estoque baixo ou superestoque).
 
-    Gerado automaticamente quando o estoque cruza o mínimo. Snapshots
-    (`triggered_quantity`, `min_stock_at_trigger`) preservam o contexto da
-    abertura para auditoria.
+    Gerado automaticamente quando o estoque cruza um limite. Snapshots
+    (`triggered_quantity`, `threshold_at_trigger`) preservam o contexto da
+    abertura para auditoria. ``kind`` distingue baixo de superestoque.
     """
 
     __tablename__ = "stock_alerts"
     __table_args__ = (
-        # Dedup: no máximo 1 alerta não-resolvido por produto (imposto pelo banco).
+        # Dedup: no máximo 1 alerta não-resolvido por (produto, tipo).
         Index(
             "uq_stock_alerts_active_per_product",
             "product_id",
+            "kind",
             unique=True,
             postgresql_where=text("status <> 'resolved'"),
         ),
@@ -62,8 +68,18 @@ class StockAlert(UUIDMixin, TimestampMixin, Base):
         default=AlertStatus.OPEN,
         nullable=False,
     )
+    kind: Mapped[AlertKind] = mapped_column(
+        SAEnum(
+            AlertKind,
+            name="alert_kind",
+            native_enum=True,
+            values_callable=lambda enum: [member.value for member in enum],
+        ),
+        default=AlertKind.LOW_STOCK,
+        nullable=False,
+    )
     triggered_quantity: Mapped[int] = mapped_column(Integer, nullable=False)
-    min_stock_at_trigger: Mapped[int] = mapped_column(Integer, nullable=False)
+    threshold_at_trigger: Mapped[int] = mapped_column(Integer, nullable=False)
 
     acknowledged_by: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
@@ -77,4 +93,4 @@ class StockAlert(UUIDMixin, TimestampMixin, Base):
     acknowledger: Mapped[User | None] = relationship(lazy="selectin")
 
     def __repr__(self) -> str:  # pragma: no cover
-        return f"<StockAlert {self.status} product={self.product_id}>"
+        return f"<StockAlert {self.kind} {self.status} product={self.product_id}>"
