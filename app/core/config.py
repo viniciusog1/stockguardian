@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     LOG_JSON: bool = True
     DASHBOARD_CACHE_TTL: int = 60  # segundos
+    REPORT_JOB_RESULT_TTL: int = 3600  # segundos que o resultado do job vive no Redis
 
     # ---- PostgreSQL ----
     POSTGRES_USER: str = "stockguardian"

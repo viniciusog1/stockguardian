@@ -15,6 +15,7 @@ from fastapi import FastAPI
 from app.api.v1.router import api_router
 from app.core.config import settings
 from app.core.logging import configure_logging, get_logger
+from app.core.queue import close_arq_pool
 from app.core.redis import close_redis, get_redis
 from app.exceptions.handlers import register_exception_handlers
 from app.middleware.request_logging import RequestLoggingMiddleware
@@ -33,6 +34,7 @@ async def lifespan(_: FastAPI) -> AsyncGenerator[None]:
         logger.warning("redis_unavailable", error=str(exc))
     yield
     await close_redis()
+    await close_arq_pool()
     logger.info("app_shutdown")
 
 
