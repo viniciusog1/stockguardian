@@ -7,10 +7,10 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query
 
-from app.dependencies.auth import CurrentUser, require_role
+from app.core.permissions import Permission
+from app.dependencies.auth import CurrentUser, require_permission
 from app.dependencies.db import DBSession
 from app.models.stock_alert import AlertStatus
-from app.models.user import UserRole
 from app.schemas.alert import AlertFilter, AlertRead
 from app.schemas.common import Page
 from app.services.alert import AlertService
@@ -18,8 +18,8 @@ from app.utils.pagination import Pagination
 
 router = APIRouter(prefix="/alerts", tags=["alerts"])
 
-OperatorUp = Depends(require_role(UserRole.OPERATOR, UserRole.MANAGER))
-ManagerUp = Depends(require_role(UserRole.MANAGER))
+CanAcknowledge = Depends(require_permission(Permission.ALERT_ACKNOWLEDGE))
+CanResolve = Depends(require_permission(Permission.ALERT_RESOLVE))
 
 
 @router.get("", response_model=Page[AlertRead])
@@ -43,7 +43,7 @@ async def get_alert(alert_id: uuid.UUID, session: DBSession, _: CurrentUser) -> 
     return AlertRead.model_validate(alert)
 
 
-@router.post("/{alert_id}/acknowledge", response_model=AlertRead, dependencies=[OperatorUp])
+@router.post("/{alert_id}/acknowledge", response_model=AlertRead, dependencies=[CanAcknowledge])
 async def acknowledge_alert(
     alert_id: uuid.UUID, session: DBSession, current_user: CurrentUser
 ) -> AlertRead:
@@ -51,7 +51,7 @@ async def acknowledge_alert(
     return AlertRead.model_validate(alert)
 
 
-@router.post("/{alert_id}/resolve", response_model=AlertRead, dependencies=[ManagerUp])
+@router.post("/{alert_id}/resolve", response_model=AlertRead, dependencies=[CanResolve])
 async def resolve_alert(alert_id: uuid.UUID, session: DBSession) -> AlertRead:
     alert = await AlertService(session).resolve(alert_id)
     return AlertRead.model_validate(alert)

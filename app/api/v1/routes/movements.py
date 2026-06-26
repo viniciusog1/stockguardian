@@ -8,10 +8,10 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, status
 
-from app.dependencies.auth import CurrentUser, require_role
+from app.core.permissions import Permission
+from app.dependencies.auth import CurrentUser, require_permission
 from app.dependencies.db import DBSession
 from app.models.stock_movement import MovementType
-from app.models.user import UserRole
 from app.schemas.common import Page
 from app.schemas.movement import MovementCreate, MovementFilter, MovementRead
 from app.services.movement import MovementService
@@ -19,12 +19,12 @@ from app.utils.pagination import Pagination
 
 router = APIRouter(prefix="/movements", tags=["movements"])
 
-# Operador pode movimentar estoque (operação do dia a dia).
-OperatorUp = Depends(require_role(UserRole.OPERATOR, UserRole.MANAGER))
+# Movimentar estoque exige movement:create (operação do dia a dia).
+CanCreate = Depends(require_permission(Permission.MOVEMENT_CREATE))
 
 
 @router.post(
-    "", response_model=MovementRead, status_code=status.HTTP_201_CREATED, dependencies=[OperatorUp]
+    "", response_model=MovementRead, status_code=status.HTTP_201_CREATED, dependencies=[CanCreate]
 )
 async def create_movement(
     data: MovementCreate, session: DBSession, current_user: CurrentUser

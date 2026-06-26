@@ -1,7 +1,7 @@
 """Dependências de autenticação e autorização.
 
-Decodifica o access token, carrega o usuário e expõe um factory ``require_role``
-para proteger rotas por papel (RBAC simples).
+Decodifica o access token, carrega o usuário e expõe o factory
+``require_permission`` para proteger rotas por permissão nomeada (RBAC granular).
 """
 
 from __future__ import annotations
@@ -14,10 +14,11 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError
 
 from app.core.config import settings
+from app.core.permissions import Permission, has_permissions
 from app.core.security import TokenType, decode_token
 from app.dependencies.db import DBSession
 from app.exceptions.domain import AuthenticationError, AuthorizationError
-from app.models.user import User, UserRole
+from app.models.user import User
 from app.repositories.user import UserRepository
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_PREFIX}/auth/login/form")
@@ -52,18 +53,18 @@ async def get_current_active_user(
 CurrentUser = Annotated[User, Depends(get_current_active_user)]
 
 
-def require_role(*allowed: UserRole) -> Callable[[User], Awaitable[User]]:
-    """Factory de dependência que exige um dos papéis informados.
+def require_permission(*required: Permission) -> Callable[[User], Awaitable[User]]:
+    """Factory de dependência que exige todas as permissões informadas.
 
-    ADMIN é sempre autorizado (superusuário).
+    As permissões derivam da role do usuário (ADMIN possui todas).
     """
 
     async def _checker(current_user: CurrentUser) -> User:
-        if current_user.role is UserRole.ADMIN or current_user.role in allowed:
+        if has_permissions(current_user.role, *required):
             return current_user
         raise AuthorizationError(
             "Permissão insuficiente para esta operação.",
-            details={"required": [r.value for r in allowed]},
+            details={"required": [p.value for p in required]},
         )
 
     return _checker

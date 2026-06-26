@@ -111,3 +111,29 @@ async def auth_client(client: AsyncClient, admin_user: User) -> AsyncClient:
     app = client._app  # type: ignore[attr-defined]
     app.dependency_overrides[get_current_active_user] = lambda: admin_user
     return client
+
+
+async def _client_as(client: AsyncClient, db_session: AsyncSession, role: UserRole) -> AsyncClient:
+    """Cria um usuário com a role dada e força-o como usuário atual no client."""
+    user = User(
+        email=f"{role.value}@test.com",
+        hashed_password=hash_password("Pw@123456"),
+        full_name=f"{role.value.title()} Teste",
+        role=role,
+    )
+    db_session.add(user)
+    await db_session.commit()
+    await db_session.refresh(user)
+    app = client._app  # type: ignore[attr-defined]
+    app.dependency_overrides[get_current_active_user] = lambda: user
+    return client
+
+
+@pytest_asyncio.fixture
+async def operator_client(client: AsyncClient, db_session: AsyncSession) -> AsyncClient:
+    return await _client_as(client, db_session, UserRole.OPERATOR)
+
+
+@pytest_asyncio.fixture
+async def manager_client(client: AsyncClient, db_session: AsyncSession) -> AsyncClient:
+    return await _client_as(client, db_session, UserRole.MANAGER)
