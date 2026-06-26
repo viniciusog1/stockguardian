@@ -68,6 +68,9 @@ strict = true
 warn_unused_ignores = true
 disallow_untyped_decorators = false
 exclude = ["migrations/"]
+# redis-py expõe alguns helpers async (ex.: from_url) sem anotação completa;
+# isenta apenas chamadas ao pacote redis do check de "untyped call" (resto segue strict).
+untyped_calls_exclude = ["redis"]
 
 [[tool.mypy.overrides]]
 module = ["jose.*"]
