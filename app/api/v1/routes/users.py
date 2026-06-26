@@ -6,19 +6,19 @@ import uuid
 
 from fastapi import APIRouter, Depends, status
 
-from app.dependencies.auth import require_role
+from app.core.permissions import Permission
+from app.dependencies.auth import require_permission
 from app.dependencies.db import DBSession
-from app.models.user import UserRole
 from app.schemas.common import Page
 from app.schemas.user import UserCreate, UserRead, UserUpdate
 from app.services.user import UserService
 from app.utils.pagination import Pagination
 
-# Todas as rotas exigem papel ADMIN.
+# Todas as rotas exigem a permissão user:manage (somente ADMIN a possui).
 router = APIRouter(
     prefix="/users",
     tags=["users"],
-    dependencies=[Depends(require_role(UserRole.ADMIN))],
+    dependencies=[Depends(require_permission(Permission.USER_MANAGE))],
 )
 
 

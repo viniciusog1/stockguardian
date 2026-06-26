@@ -32,3 +32,9 @@ class UserRead(UserBase):
     id: uuid.UUID
     created_at: datetime
     updated_at: datetime
+
+
+class UserMe(UserRead):
+    """Usuário autenticado + suas permissões (derivadas da role)."""
+
+    permissions: list[str]

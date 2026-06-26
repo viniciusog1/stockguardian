@@ -7,6 +7,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
 
+from app.core.permissions import permissions_for
 from app.dependencies.auth import CurrentUser
 from app.dependencies.db import DBSession, RedisClient
 from app.schemas.auth import (
@@ -15,7 +16,7 @@ from app.schemas.auth import (
     RegisterRequest,
     TokenPair,
 )
-from app.schemas.user import UserRead
+from app.schemas.user import UserMe, UserRead
 from app.services.auth import AuthService
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -52,6 +53,8 @@ async def logout(data: RefreshRequest, session: DBSession, redis: RedisClient) -
     await AuthService(session, redis).logout(data.refresh_token)
 
 
-@router.get("/me", response_model=UserRead)
-async def me(current_user: CurrentUser) -> UserRead:
-    return UserRead.model_validate(current_user)
+@router.get("/me", response_model=UserMe)
+async def me(current_user: CurrentUser) -> UserMe:
+    perms = sorted(p.value for p in permissions_for(current_user.role))
+    data = UserRead.model_validate(current_user).model_dump()
+    return UserMe(**data, permissions=perms)

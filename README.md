@@ -18,7 +18,7 @@ software real de empresa, com arquitetura limpa, segurança e testes.
 ## ✨ Funcionalidades (Fase 1 — MVP)
 
 - 🔐 **Autenticação JWT** (access + refresh com rotação e revogação via Redis)
-- 👥 **Usuários e papéis** (ADMIN / MANAGER / OPERATOR) com RBAC
+- 👥 **Usuários e papéis** (ADMIN / MANAGER / OPERATOR) com RBAC granular por permissões nomeadas (`product:write`, `alert:resolve`…); `/auth/me` expõe as permissões
 - 🏭 **Fornecedores** — CRUD com validação de CPF/CNPJ
 - 📦 **Produtos** — CRUD com SKU único, preço, estoque mín/máx
 - 🔄 **Movimentações de estoque** — entrada / saída / ajuste, atômicas e com lock
@@ -128,7 +128,7 @@ CI (GitHub Actions) roda lint + mypy + pytest contra um serviço Postgres a cada
 ## 🗺️ Roadmap
 
 - [x] **Fase 1 — MVP**: auth, usuários, fornecedores, produtos, movimentações, histórico
-- [ ] **Fase 2**: ~~alertas de estoque baixo~~ ✅ · ~~dashboard operacional~~ ✅ · RBAC granular
+- [x] **Fase 2**: alertas de estoque baixo · dashboard operacional · RBAC granular
 - [ ] **Fase 3**: detecção de superestoque, relatórios, export Excel, tarefas assíncronas
 - [ ] **Fase 4**: observabilidade (Prometheus/OpenTelemetry), deploy, monitoramento
 
