@@ -12,6 +12,7 @@ from app.repositories.product import ProductRepository
 from app.repositories.supplier import SupplierRepository
 from app.schemas.common import Page, PaginationParams
 from app.schemas.product import ProductCreate, ProductUpdate
+from app.services.alert import AlertService
 
 
 class ProductService:
@@ -49,6 +50,10 @@ class ProductService:
             raise NotFoundError("Fornecedor", payload["supplier_id"])
         for field, value in payload.items():
             setattr(product, field, value)
+        # Alterar mínimo/quantidade pode abrir ou resolver alerta sem movimentação.
+        if "min_stock" in payload or "quantity" in payload:
+            await self.session.flush()
+            await AlertService(self.session).evaluate(product)
         await self.session.commit()
         await self.session.refresh(product)
         return product
