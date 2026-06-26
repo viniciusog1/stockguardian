@@ -34,6 +34,7 @@ class Settings(BaseSettings):
     API_V1_PREFIX: str = "/api/v1"
     LOG_LEVEL: str = "INFO"
     LOG_JSON: bool = True
+    DASHBOARD_CACHE_TTL: int = 60  # segundos
 
     # ---- PostgreSQL ----
     POSTGRES_USER: str = "stockguardian"
