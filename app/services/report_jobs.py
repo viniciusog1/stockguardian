@@ -12,6 +12,7 @@ from datetime import datetime
 from arq.connections import ArqRedis
 from arq.jobs import Job, JobStatus
 
+from app.core.metrics import REPORT_JOBS_ENQUEUED_TOTAL
 from app.exceptions.domain import ConflictError
 from app.schemas.report_job import ReportJobState
 from app.utils.excel import ExportFile
@@ -49,7 +50,9 @@ class ReportJobQueue:
             supplier_id=supplier_id,
             only_active=only_active,
         )
-        return _require_job_id(job)
+        job_id = _require_job_id(job)
+        REPORT_JOBS_ENQUEUED_TOTAL.labels(report="inventory_valuation").inc()
+        return job_id
 
     async def enqueue_movements_summary(
         self,
@@ -64,7 +67,9 @@ class ReportJobQueue:
             date_from=date_from,
             date_to=date_to,
         )
-        return _require_job_id(job)
+        job_id = _require_job_id(job)
+        REPORT_JOBS_ENQUEUED_TOTAL.labels(report="movements_summary").inc()
+        return job_id
 
     async def get_status(self, job_id: str) -> ReportJobState:
         job = Job(job_id, self.pool)

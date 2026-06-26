@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import contextlib
+
 from fastapi import FastAPI
 from prometheus_client import Counter
 from prometheus_fastapi_instrumentator import Instrumentator
@@ -36,9 +38,8 @@ def setup_metrics(app: FastAPI) -> None:
     registry global, reaproveita sem falhar.
     """
     instrumentator = Instrumentator()
-    try:
+    # ValueError: métricas HTTP já registradas no processo (múltiplos create_app);
+    # segue só com a exposição.
+    with contextlib.suppress(ValueError):
         instrumentator.instrument(app)
-    except ValueError:
-        # métricas HTTP já registradas no processo; segue só com a exposição
-        pass
     instrumentator.expose(app, endpoint="/metrics", include_in_schema=False)

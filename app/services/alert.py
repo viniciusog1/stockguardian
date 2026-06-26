@@ -16,6 +16,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.logging import get_logger
+from app.core.metrics import ALERTS_OPENED_TOTAL, ALERTS_RESOLVED_TOTAL
 from app.exceptions.domain import ConflictError, NotFoundError
 from app.models.product import Product
 from app.models.stock_alert import AlertKind, AlertStatus, StockAlert
@@ -87,6 +88,7 @@ class AlertService:
                     quantity=product.quantity,
                     threshold=threshold,
                 )
+                ALERTS_OPENED_TOTAL.labels(kind=kind.value).inc()
             elif action is AlertAction.RESOLVE and active is not None:
                 active.status = AlertStatus.RESOLVED
                 active.resolved_at = datetime.now(UTC)
@@ -98,6 +100,7 @@ class AlertService:
                     kind=kind.value,
                     quantity=product.quantity,
                 )
+                ALERTS_RESOLVED_TOTAL.labels(kind=kind.value).inc()
 
     async def get(self, alert_id: uuid.UUID) -> StockAlert:
         alert = await self.repo.get(alert_id)

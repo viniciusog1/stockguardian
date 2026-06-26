@@ -12,6 +12,7 @@ import uuid
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.logging import get_logger
+from app.core.metrics import MOVEMENTS_TOTAL
 from app.exceptions.domain import InsufficientStockError, NotFoundError
 from app.models.product import Product
 from app.models.stock_movement import MovementType, StockMovement
@@ -73,6 +74,7 @@ class MovementService:
             balance_after=new_balance,
             user_id=str(user_id),
         )
+        MOVEMENTS_TOTAL.labels(type=data.type.value).inc()
         return movement
 
     async def get_product(self, product_id: uuid.UUID) -> Product:
