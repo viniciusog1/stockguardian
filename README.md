@@ -36,6 +36,7 @@ software real de empresa, com arquitetura limpa, segurança e testes.
 | Banco | PostgreSQL 16 |
 | Cache / tokens / fila | Redis 7 |
 | Tarefas assíncronas | ARQ (worker async) |
+| Métricas | Prometheus (prometheus-fastapi-instrumentator) |
 | Validação | Pydantic v2 |
 | Testes | pytest + pytest-asyncio |
 | Deps | uv |
@@ -116,6 +117,7 @@ Login inicial (do `.env`): `admin@stockguardian.com` / `Admin@123`.
 | POST | `/reports/movements-summary/export-async` | Enfileira geração do `.xlsx` (assíncrono, ARQ) | MANAGER+ |
 | GET | `/reports/jobs/{id}` | Status do job de relatório | MANAGER+ |
 | GET | `/reports/jobs/{id}/download` | Baixa o `.xlsx` do job concluído | MANAGER+ |
+| GET | `/metrics` | Métricas Prometheus (HTTP + negócio) | público (scrape) |
 
 ## 🧪 Testes & qualidade
 
@@ -139,7 +141,7 @@ CI (GitHub Actions) roda lint + mypy + pytest contra um serviço Postgres a cada
 - [x] **Fase 1 — MVP**: auth, usuários, fornecedores, produtos, movimentações, histórico
 - [x] **Fase 2**: alertas de estoque baixo · dashboard operacional · RBAC granular
 - [x] **Fase 3**: detecção de superestoque · relatórios · export Excel · tarefas assíncronas (ARQ)
-- [ ] **Fase 4**: observabilidade (Prometheus/OpenTelemetry), deploy, monitoramento
+- [ ] **Fase 4**: ~~métricas Prometheus~~ ✅ · health/readiness · tracing OpenTelemetry · deploy/monitoramento
 
 ## 📄 Licença
 
