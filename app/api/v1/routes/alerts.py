@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, Query
 from app.core.permissions import Permission
 from app.dependencies.auth import CurrentUser, require_permission
 from app.dependencies.db import DBSession
-from app.models.stock_alert import AlertStatus
+from app.models.stock_alert import AlertKind, AlertStatus
 from app.schemas.alert import AlertFilter, AlertRead
 from app.schemas.common import Page
 from app.services.alert import AlertService
@@ -28,9 +28,10 @@ async def list_alerts(
     _: CurrentUser,
     pagination: Pagination,
     status: Annotated[AlertStatus | None, Query()] = None,
+    kind: Annotated[AlertKind | None, Query()] = None,
     product_id: Annotated[uuid.UUID | None, Query()] = None,
 ) -> Page[AlertRead]:
-    filters = AlertFilter(status=status, product_id=product_id)
+    filters = AlertFilter(status=status, kind=kind, product_id=product_id)
     page = await AlertService(session).list(filters, pagination)
     return Page[AlertRead].create(
         [AlertRead.model_validate(a) for a in page.items], page.total, pagination

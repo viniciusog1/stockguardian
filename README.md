@@ -103,7 +103,7 @@ Login inicial (do `.env`): `admin@stockguardian.com` / `Admin@123`.
 | GET/POST/PATCH/DELETE | `/products` | Produtos | leitura: autenticado · escrita: MANAGER+ |
 | POST | `/movements` | Registrar movimentação | OPERATOR+ |
 | GET | `/movements` | Histórico (filtros + paginação) | autenticado |
-| GET | `/alerts` | Alertas de estoque baixo (filtro `status`, `product_id`) | autenticado |
+| GET | `/alerts` | Alertas de estoque baixo/superestoque (filtro `status`, `kind`, `product_id`) | autenticado |
 | POST | `/alerts/{id}/acknowledge` | Reconhecer alerta | OPERATOR+ |
 | POST | `/alerts/{id}/resolve` | Resolver alerta | MANAGER+ |
 | GET | `/dashboard/summary` | Contadores gerais (cache Redis) | MANAGER+ |
@@ -129,7 +129,7 @@ CI (GitHub Actions) roda lint + mypy + pytest contra um serviço Postgres a cada
 
 - [x] **Fase 1 — MVP**: auth, usuários, fornecedores, produtos, movimentações, histórico
 - [x] **Fase 2**: alertas de estoque baixo · dashboard operacional · RBAC granular
-- [ ] **Fase 3**: detecção de superestoque, relatórios, export Excel, tarefas assíncronas
+- [ ] **Fase 3**: ~~detecção de superestoque~~ ✅ · relatórios · export Excel · tarefas assíncronas
 - [ ] **Fase 4**: observabilidade (Prometheus/OpenTelemetry), deploy, monitoramento
 
 ## 📄 Licença
