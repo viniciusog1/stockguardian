@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import uuid
+from collections.abc import Sequence
 from datetime import datetime
 
-from sqlalchemy import Select, func, select
+from sqlalchemy import Row, Select, func, select
 
 from app.models.stock_movement import MovementType, StockMovement
 from app.repositories.base import BaseRepository
@@ -61,3 +62,25 @@ class MovementRepository(BaseRepository[StockMovement]):
         ).subquery()
         result = await self.session.execute(select(func.count()).select_from(base))
         return int(result.scalar_one())
+
+    async def summary_by_type(
+        self,
+        *,
+        product_id: uuid.UUID | None = None,
+        date_from: datetime | None = None,
+        date_to: datetime | None = None,
+    ) -> Sequence[Row[tuple[MovementType, int, int]]]:
+        """Agrega contagem e soma de quantidade por tipo de movimentação no período."""
+        stmt = select(
+            StockMovement.type,
+            func.count().label("movement_count"),
+            func.coalesce(func.sum(StockMovement.quantity), 0).label("total_quantity"),
+        ).group_by(StockMovement.type)
+        if product_id is not None:
+            stmt = stmt.where(StockMovement.product_id == product_id)
+        if date_from is not None:
+            stmt = stmt.where(StockMovement.created_at >= date_from)
+        if date_to is not None:
+            stmt = stmt.where(StockMovement.created_at <= date_to)
+        result = await self.session.execute(stmt)
+        return result.all()
