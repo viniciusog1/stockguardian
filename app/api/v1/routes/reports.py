@@ -14,10 +14,9 @@ from app.dependencies.db import DBSession
 from app.schemas.report import InventoryValuationReport, MovementsSummaryReport
 from app.services.report import ReportService
 from app.utils.excel import (
-    XLSX_MEDIA_TYPE,
-    inventory_valuation_workbook,
-    movements_summary_workbook,
-    workbook_to_bytes,
+    ExportFile,
+    inventory_valuation_export_file,
+    movements_summary_export_file,
 )
 
 router = APIRouter(
@@ -25,6 +24,14 @@ router = APIRouter(
     tags=["reports"],
     dependencies=[Depends(require_permission(Permission.REPORT_READ))],
 )
+
+
+def _xlsx_response(export: ExportFile) -> Response:
+    return Response(
+        content=export.content,
+        media_type=export.media_type,
+        headers={"Content-Disposition": f'attachment; filename="{export.filename}"'},
+    )
 
 
 @router.get("/inventory-valuation", response_model=InventoryValuationReport)
@@ -47,13 +54,7 @@ async def inventory_valuation_export(
     report = await ReportService(session).inventory_valuation(
         supplier_id=supplier_id, only_active=only_active
     )
-    content = workbook_to_bytes(inventory_valuation_workbook(report))
-    filename = f"inventory-valuation-{report.generated_at.date().isoformat()}.xlsx"
-    return Response(
-        content=content,
-        media_type=XLSX_MEDIA_TYPE,
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
-    )
+    return _xlsx_response(inventory_valuation_export_file(report))
 
 
 @router.get("/movements-summary", response_model=MovementsSummaryReport)
@@ -78,10 +79,4 @@ async def movements_summary_export(
     report = await ReportService(session).movements_summary(
         product_id=product_id, date_from=date_from, date_to=date_to
     )
-    content = workbook_to_bytes(movements_summary_workbook(report))
-    filename = f"movements-summary-{report.generated_at.date().isoformat()}.xlsx"
-    return Response(
-        content=content,
-        media_type=XLSX_MEDIA_TYPE,
-        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
-    )
+    return _xlsx_response(movements_summary_export_file(report))

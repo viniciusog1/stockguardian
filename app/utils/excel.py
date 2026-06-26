@@ -7,6 +7,7 @@ HTTP cuida do streaming/headers. Mantém a serialização testável sem DB.
 from __future__ import annotations
 
 import io
+from dataclasses import dataclass
 
 from openpyxl import Workbook
 from openpyxl.styles import Font
@@ -17,6 +18,15 @@ from app.schemas.report import InventoryValuationReport, MovementsSummaryReport
 XLSX_MEDIA_TYPE = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 _MONEY_FORMAT = "#,##0.00"
 _BOLD = Font(bold=True)
+
+
+@dataclass(frozen=True)
+class ExportFile:
+    """Arquivo pronto para download: nome, media type e bytes."""
+
+    filename: str
+    media_type: str
+    content: bytes
 
 
 def _active_sheet(workbook: Workbook, title: str) -> Worksheet:
@@ -98,3 +108,15 @@ def workbook_to_bytes(workbook: Workbook) -> bytes:
     buffer = io.BytesIO()
     workbook.save(buffer)
     return buffer.getvalue()
+
+
+def inventory_valuation_export_file(report: InventoryValuationReport) -> ExportFile:
+    content = workbook_to_bytes(inventory_valuation_workbook(report))
+    filename = f"inventory-valuation-{report.generated_at.date().isoformat()}.xlsx"
+    return ExportFile(filename=filename, media_type=XLSX_MEDIA_TYPE, content=content)
+
+
+def movements_summary_export_file(report: MovementsSummaryReport) -> ExportFile:
+    content = workbook_to_bytes(movements_summary_workbook(report))
+    filename = f"movements-summary-{report.generated_at.date().isoformat()}.xlsx"
+    return ExportFile(filename=filename, media_type=XLSX_MEDIA_TYPE, content=content)
