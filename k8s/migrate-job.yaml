@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: stockguardian-migrate
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: stockguardian-migrate
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: migrate
+          image: ghcr.io/viniciusog1/stockguardian:latest
+          command: ["alembic", "upgrade", "head"]
+          envFrom:
+            - configMapRef:
+                name: stockguardian-config
+            - secretRef:
+                name: stockguardian-secrets
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
