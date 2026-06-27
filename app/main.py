@@ -19,6 +19,7 @@ from app.core.logging import configure_logging, get_logger
 from app.core.metrics import setup_metrics
 from app.core.queue import close_arq_pool
 from app.core.redis import close_redis, get_redis
+from app.core.tracing import setup_tracing
 from app.exceptions.handlers import register_exception_handlers
 from app.middleware.request_logging import RequestLoggingMiddleware
 
@@ -59,6 +60,9 @@ def create_app() -> FastAPI:
 
     if settings.METRICS_ENABLED:
         setup_metrics(app)
+
+    if settings.TRACING_ENABLED:
+        setup_tracing(app)
 
     return app
 

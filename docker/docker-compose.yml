@@ -74,6 +74,16 @@ services:
       - api
     restart: unless-stopped
 
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    profiles: ["observability"]
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686"
+      - "4318:4318"
+    restart: unless-stopped
+
   grafana:
     image: grafana/grafana:latest
     profiles: ["observability"]
