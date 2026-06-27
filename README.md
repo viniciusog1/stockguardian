@@ -107,6 +107,17 @@ docker compose -f docker/docker-compose.yml --profile observability up -d --buil
   suba com `--profile observability`; o serviço **StockGuardian** aparece com traces de
   FastAPI/SQLAlchemy/Redis.
 
+## ☸️ Deploy (Kubernetes)
+
+Manifests Kustomize em [`k8s/`](k8s/) sobem api + worker + Postgres + Redis, com
+migrations via Job e probes em `/health` / `/health/ready`:
+
+```bash
+kubectl apply -k k8s/
+```
+
+Guia completo (build da imagem, Secret real, validação): [`k8s/README.md`](k8s/README.md).
+
 ## 🔌 Endpoints principais (prefixo `/api/v1`)
 
 | Método | Rota | Descrição | Acesso |
@@ -159,7 +170,7 @@ CI (GitHub Actions) roda lint + mypy + pytest contra um serviço Postgres a cada
 - [x] **Fase 1 — MVP**: auth, usuários, fornecedores, produtos, movimentações, histórico
 - [x] **Fase 2**: alertas de estoque baixo · dashboard operacional · RBAC granular
 - [x] **Fase 3**: detecção de superestoque · relatórios · export Excel · tarefas assíncronas (ARQ)
-- [ ] **Fase 4**: ~~métricas Prometheus~~ ✅ · ~~health/readiness~~ ✅ · ~~scrape (Prometheus+Grafana)~~ ✅ · ~~tracing OpenTelemetry~~ ✅ · deploy/monitoramento
+- [x] **Fase 4**: métricas Prometheus · health/readiness · scrape (Prometheus+Grafana) · tracing OpenTelemetry · deploy (manifests Kubernetes)
 
 ## 📄 Licença
 
