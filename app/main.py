@@ -12,6 +12,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from app.api import health
 from app.api.v1.router import api_router
 from app.core.config import settings
 from app.core.logging import configure_logging, get_logger
@@ -54,10 +55,7 @@ def create_app() -> FastAPI:
     app.add_middleware(RequestLoggingMiddleware)
     register_exception_handlers(app)
     app.include_router(api_router, prefix=settings.API_V1_PREFIX)
-
-    @app.get("/health", tags=["health"], summary="Liveness probe")
-    async def health() -> dict[str, str]:
-        return {"status": "ok", "service": settings.PROJECT_NAME}
+    app.include_router(health.router)
 
     if settings.METRICS_ENABLED:
         setup_metrics(app)
