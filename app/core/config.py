@@ -36,6 +36,7 @@ class Settings(BaseSettings):
     LOG_JSON: bool = True
     DASHBOARD_CACHE_TTL: int = 60  # segundos
     REPORT_JOB_RESULT_TTL: int = 3600  # segundos que o resultado do job vive no Redis
+    METRICS_ENABLED: bool = True  # expõe /metrics (Prometheus)
 
     # ---- PostgreSQL ----
     POSTGRES_USER: str = "stockguardian"

@@ -12,6 +12,7 @@ from datetime import datetime
 from arq.connections import ArqRedis
 from arq.jobs import Job, JobStatus
 
+from app.core.metrics import REPORT_JOBS_ENQUEUED_TOTAL
 from app.exceptions.domain import ConflictError
 from app.schemas.report_job import ReportJobState
 from app.utils.excel import ExportFile
@@ -31,24 +32,27 @@ def map_job_status(status: JobStatus, *, success: bool | None = None) -> ReportJ
     return ReportJobState.COMPLETE if success else ReportJobState.FAILED
 
 
+def _require_job_id(job: Job | None) -> str:
+    if job is None:
+        raise ConflictError("Não foi possível enfileirar o relatório.")
+    return job.job_id
+
+
 class ReportJobQueue:
     def __init__(self, pool: ArqRedis) -> None:
         self.pool = pool
 
-    async def _enqueue(self, function: str, **kwargs: object) -> str:
-        job = await self.pool.enqueue_job(function, **kwargs)
-        if job is None:
-            raise ConflictError("Não foi possível enfileirar o relatório.")
-        return job.job_id
-
     async def enqueue_inventory_valuation(
         self, *, supplier_id: uuid.UUID | None, only_active: bool
     ) -> str:
-        return await self._enqueue(
+        job = await self.pool.enqueue_job(
             "generate_inventory_valuation_export",
             supplier_id=supplier_id,
             only_active=only_active,
         )
+        job_id = _require_job_id(job)
+        REPORT_JOBS_ENQUEUED_TOTAL.labels(report="inventory_valuation").inc()
+        return job_id
 
     async def enqueue_movements_summary(
         self,
@@ -57,12 +61,15 @@ class ReportJobQueue:
         date_from: datetime | None,
         date_to: datetime | None,
     ) -> str:
-        return await self._enqueue(
+        job = await self.pool.enqueue_job(
             "generate_movements_summary_export",
             product_id=product_id,
             date_from=date_from,
             date_to=date_to,
         )
+        job_id = _require_job_id(job)
+        REPORT_JOBS_ENQUEUED_TOTAL.labels(report="movements_summary").inc()
+        return job_id
 
     async def get_status(self, job_id: str) -> ReportJobState:
         job = Job(job_id, self.pool)
