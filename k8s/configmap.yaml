@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: stockguardian-config
+data:
+  PROJECT_NAME: StockGuardian
+  ENVIRONMENT: production
+  DEBUG: "false"
+  API_V1_PREFIX: /api/v1
+  LOG_LEVEL: INFO
+  LOG_JSON: "true"
+  DASHBOARD_CACHE_TTL: "60"
+  REPORT_JOB_RESULT_TTL: "3600"
+  METRICS_ENABLED: "true"
+  TRACING_ENABLED: "false"
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318/v1/traces
+  POSTGRES_HOST: postgres
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: stockguardian
+  REDIS_HOST: redis
+  REDIS_PORT: "6379"
+  REDIS_DB: "0"
