@@ -91,6 +91,18 @@ docker compose -f docker/docker-compose.yml exec api python -m scripts.seed
 
 Login inicial (do `.env`): `admin@stockguardian.com` / `Admin@123`.
 
+### 📈 Observabilidade (opcional)
+
+Sobe Prometheus + Grafana com o profile `observability`:
+
+```bash
+docker compose -f docker/docker-compose.yml --profile observability up -d --build
+```
+
+- Prometheus: <http://localhost:9090> (Status ▸ Targets: `stockguardian-api` deve estar UP)
+- Grafana: <http://localhost:3000> — login `admin` / `$GRAFANA_ADMIN_PASSWORD` (default `admin`);
+  o dashboard **StockGuardian** já vem provisionado (HTTP + métricas de negócio).
+
 ## 🔌 Endpoints principais (prefixo `/api/v1`)
 
 | Método | Rota | Descrição | Acesso |
@@ -143,7 +155,7 @@ CI (GitHub Actions) roda lint + mypy + pytest contra um serviço Postgres a cada
 - [x] **Fase 1 — MVP**: auth, usuários, fornecedores, produtos, movimentações, histórico
 - [x] **Fase 2**: alertas de estoque baixo · dashboard operacional · RBAC granular
 - [x] **Fase 3**: detecção de superestoque · relatórios · export Excel · tarefas assíncronas (ARQ)
-- [ ] **Fase 4**: ~~métricas Prometheus~~ ✅ · ~~health/readiness~~ ✅ · tracing OpenTelemetry · deploy/monitoramento
+- [ ] **Fase 4**: ~~métricas Prometheus~~ ✅ · ~~health/readiness~~ ✅ · ~~scrape (Prometheus+Grafana)~~ ✅ · tracing OpenTelemetry · deploy/monitoramento
 
 ## 📄 Licença
 
