@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: stockguardian
+
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - secret.example.yaml
+  - postgres.yaml
+  - redis.yaml
+  - migrate-job.yaml
+  - api.yaml
+  - worker.yaml
+
+images:
+  - name: ghcr.io/viniciusog1/stockguardian
+    newTag: latest
