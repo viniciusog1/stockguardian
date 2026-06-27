@@ -37,6 +37,7 @@ software real de empresa, com arquitetura limpa, segurança e testes.
 | Cache / tokens / fila | Redis 7 |
 | Tarefas assíncronas | ARQ (worker async) |
 | Métricas | Prometheus (prometheus-fastapi-instrumentator) |
+| Tracing | OpenTelemetry (OTLP → Jaeger) |
 | Validação | Pydantic v2 |
 | Testes | pytest + pytest-asyncio |
 | Deps | uv |
@@ -102,6 +103,9 @@ docker compose -f docker/docker-compose.yml --profile observability up -d --buil
 - Prometheus: <http://localhost:9090> (Status ▸ Targets: `stockguardian-api` deve estar UP)
 - Grafana: <http://localhost:3000> — login `admin` / `$GRAFANA_ADMIN_PASSWORD` (default `admin`);
   o dashboard **StockGuardian** já vem provisionado (HTTP + métricas de negócio).
+- Jaeger (tracing): <http://localhost:16686> — defina `TRACING_ENABLED=true` no `.env` e
+  suba com `--profile observability`; o serviço **StockGuardian** aparece com traces de
+  FastAPI/SQLAlchemy/Redis.
 
 ## 🔌 Endpoints principais (prefixo `/api/v1`)
 
@@ -155,7 +159,7 @@ CI (GitHub Actions) roda lint + mypy + pytest contra um serviço Postgres a cada
 - [x] **Fase 1 — MVP**: auth, usuários, fornecedores, produtos, movimentações, histórico
 - [x] **Fase 2**: alertas de estoque baixo · dashboard operacional · RBAC granular
 - [x] **Fase 3**: detecção de superestoque · relatórios · export Excel · tarefas assíncronas (ARQ)
-- [ ] **Fase 4**: ~~métricas Prometheus~~ ✅ · ~~health/readiness~~ ✅ · ~~scrape (Prometheus+Grafana)~~ ✅ · tracing OpenTelemetry · deploy/monitoramento
+- [ ] **Fase 4**: ~~métricas Prometheus~~ ✅ · ~~health/readiness~~ ✅ · ~~scrape (Prometheus+Grafana)~~ ✅ · ~~tracing OpenTelemetry~~ ✅ · deploy/monitoramento
 
 ## 📄 Licença
 
