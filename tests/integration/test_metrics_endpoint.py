@@ -24,12 +24,12 @@ async def test_metrics_open_and_lists_names(client: AsyncClient) -> None:
 async def test_movement_increments_counter(auth_client: AsyncClient) -> None:
     doc = str(uuid.uuid4().int)[:14]
     sid = (
-        await auth_client.post(f"{PREFIX}/suppliers", json={"name": "F", "document": doc})
+        await auth_client.post(f"{PREFIX}/suppliers", json={"name": "Forn", "document": doc})
     ).json()["id"]
     pid = (
         await auth_client.post(
             f"{PREFIX}/products",
-            json={"sku": "M-" + uuid.uuid4().hex[:6], "name": "P", "supplier_id": sid},
+            json={"sku": "M-" + uuid.uuid4().hex[:6], "name": "Prod", "supplier_id": sid},
         )
     ).json()["id"]
     await auth_client.post(
