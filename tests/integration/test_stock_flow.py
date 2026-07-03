@@ -97,3 +97,14 @@ async def test_duplicate_sku_conflict(auth_client: AsyncClient) -> None:
     )
     assert resp.status_code == 409
     assert resp.json()["error"]["code"] == "conflict"
+
+
+async def test_invalid_supplier_document_returns_422(auth_client: AsyncClient) -> None:
+    # Documento com letras -> validador customizado rejeita. O handler deve
+    # devolver 422 (não 500 por erro de serialização do detalhe).
+    resp = await auth_client.post(
+        f"{PREFIX}/suppliers",
+        json={"name": "Fornecedor Y", "document": "fornecedorbrasil"},
+    )
+    assert resp.status_code == 422, resp.text
+    assert resp.json()["error"]["code"] == "request_validation_error"

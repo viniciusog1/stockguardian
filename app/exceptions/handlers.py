@@ -9,6 +9,7 @@ from __future__ import annotations
 from typing import Any
 
 from fastapi import FastAPI, Request, status
+from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
@@ -57,12 +58,14 @@ def register_exception_handlers(app: FastAPI) -> None:
 
     @app.exception_handler(RequestValidationError)
     async def validation_handler(_: Request, exc: RequestValidationError) -> JSONResponse:
+        # jsonable_encoder garante serialização quando errors() carrega objetos
+        # não-JSON (ex.: o ValueError de um validador customizado no ctx).
         return JSONResponse(
             status_code=422,  # Unprocessable Content
             content=_error_body(
                 "request_validation_error",
                 "Erro de validação na requisição.",
-                {"errors": exc.errors()},
+                {"errors": jsonable_encoder(exc.errors())},
             ),
         )
 
