@@ -155,12 +155,12 @@ Testes de integração usam um **PostgreSQL real**; o Redis é substituído por
 
 ```bash
 # com um Postgres de teste disponível (ex.: docker compose up db)
-uv pip install ".[dev]"
+uv sync --extra dev
 createdb stockguardian_test          # ou via psql
 
-pytest                                # unit + integration
-ruff check . && ruff format --check . # lint
-mypy app                              # type-check (strict)
+uv run --extra dev pytest              # unit + integration
+uv run --extra dev ruff check . && uv run --extra dev ruff format --check .
+uv run --extra dev mypy app            # type-check (strict)
 ```
 
 CI (GitHub Actions) roda lint + mypy + pytest contra um serviço Postgres a cada push/PR.
