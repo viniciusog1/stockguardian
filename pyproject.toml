@@ -9,7 +9,7 @@ license = { text = "MIT" }
 dependencies = [
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.32.0",
-    "sqlalchemy[asyncio]>=2.0.36",
+    "sqlalchemy[asyncio]>=2.0.36,<2.1",  # 2.1 muda a tipagem de Select/Row
     "asyncpg>=0.30.0",
     "alembic>=1.14.0",
     "pydantic>=2.10.0",
@@ -54,6 +54,7 @@ packages = ["app"]
 line-length = 100
 target-version = "py313"
 src = ["app", "tests"]
+extend-exclude = ["*.md"]  # ruff recente formata blocos de código em Markdown
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "N", "UP", "B", "C4", "SIM", "RUF"]
